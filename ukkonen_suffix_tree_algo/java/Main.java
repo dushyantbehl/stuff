@@ -18,7 +18,6 @@ public class Main {
 			System.err.println("ERROR: Exception occured while writing output file "+e.getMessage());
 			System.exit(1);
 		}
-		
 	}
 	
 	public static void main(String[] args) {
@@ -59,10 +58,12 @@ public class Main {
 			System.err.println("ERROR: Exception occured while reading input file "+e.getMessage());
 			System.exit(1);
 		}
-		in = in + ukkonen.magicCharacter;
 		System.out.println("Read the input from the file");
+		System.out.println("Using the magic character \'"+ukkonen.getMagicCharacter()+"\'");
 		
 		startTime = System.currentTimeMillis();
+		
+		ukkonen.createTree(in);
 		
 		endTime = System.currentTimeMillis();
 		
