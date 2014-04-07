@@ -6,6 +6,7 @@ public class Node {
 	private Node parent;
 	public Node suffixLink;
 	private final int inf = Integer.MAX_VALUE;
+	private int nodeId;
 	public HashMap<Character , Node> children = null;
 	
 	/* We Store the incoming edges of the nodes in the nodes itself.
@@ -18,6 +19,15 @@ public class Node {
 		setParent(null);
 		edgeStart = 0;
 		edgeEnd = inf;
+		setNodeId(0);
+	}
+	
+	public Node(int id){
+		children = new HashMap<Character, Node>();
+		parent = null;
+		edgeStart = 0;
+		edgeEnd = inf;
+		nodeId = id;
 	}
 
 	public int getEdgeStart() {
@@ -58,5 +68,17 @@ public class Node {
 
 	public void setParent(Node parent) {
 		this.parent = parent;
+	}
+
+	public long getNodeId() {
+		return nodeId;
+	}
+
+	public void setNodeId(int nodeId) {
+		this.nodeId = nodeId;
+	}
+	
+	public int length(int phaseID){
+		return Math.min(edgeEnd, phaseID) - edgeStart;
 	}
 }
