@@ -1,191 +1,183 @@
+import java.util.Map.Entry;
+
+/* The class to build the suffix tree. */
 public class SuffixTree {
 
-	private final Character magicCharacter = '$';
+	/*The character used to convert implicit 
+	  suffix tree to explicit suffix tree.  */
+	private Character magicCharacter = '$';
+	
+	/*The root node of the tree.*/
 	private Node root;
+	
+	/*The backing text string of the tree.*/
 	private String text;
+	
+	/* The node id variable, used to assign unique
+	   node id's to the nodes. */
 	private int nodeId = 0;
 	
-	private Node current_node;
-	private int current_edge;
-	private int current_length;
+	/* The variable storing where each addition should happen. */
+	private Index pos;
 	
-	private int remainder = 0;
-	private int textLength = 0;
-		
-	public static class Index {
-		public Node node;
-		public int pos;
-	}
+	/* The variable which stores how many iterations to run. */
+	private int times;
 	
+	/* Length of the backing string. */
+	private int textLength;
+			
+	//Constructor
 	public SuffixTree(){
 		root = new Node(nodeId++);
 		text = null;
+		pos = new Index(root);
+		times = 0;
+		textLength = 0;
 	}
-	
+	/* Getter and setters of some variables. */
 	public Node getRoot(){
 		return root;
+	}
+	
+	public String getText(){
+		return text;
 	}
 	
 	public Character getMagicCharacter(){
 		return magicCharacter;
 	}
 	
-	public boolean searchPos(Node node, int phaseID){
-		if(current_length >= node.length(phaseID)){
-			current_edge += node.length(phaseID);
-			current_length -= node.length(phaseID);
-			current_node = node;
-			return true;
-		}
-		return false;
+	public void setMagicCharacter( Character c ){
+		magicCharacter = c;
 	}
+	
+	/* Function to free the memory used by the tree. */
+	public void free(){
+		text = null;
+		pos = null;
+		freeNode(root);
+	}
+	
+	/* Internal function used to free nodes recursively. */
+	private void freeNode(Node node){
+		for (Entry<Character, Node> entry : node.getChildren().entrySet()) {
+			freeNode(entry.getValue());
+		}
+		node.setChildren(null);
+		node = null;
+	}
+	
+	/* Add a leaf to the node cur at the edge edge. */
+	private void addLeaf (Node cur, Character edge, int phase){
 		
+		//Create a new node and add it to the internal node as a leaf.
+		Node leaf = new Node(nodeId++);
+		leaf.setEdgeEnd(textLength);
+		leaf.setEdgeStart(phase);
+		cur.getChildren().put(edge, leaf);
+		leaf.setParent(cur);
+	}
+	
+	/* Split the edge incoming to node cur and add a leaf node.*/
+	private Node split (Node cur, Character edge, int len, int phase){
+		
+		//First create a new internal node with incoming edge
+		//of the current node and edge ending after length len.
+		Node split = new Node(nodeId++);
+		split.setEdgeStart(cur.getEdgeStart());
+		split.setEdgeEnd(cur.getEdgeStart()+len);
+		pos.getNode().getChildren().put(edge, split);
+		split.setParent(pos.getNode());
+	
+		//Add the current node to this newly created node
+		//at the edge labelled by the character current label + len.
+		cur.setEdgeStart(cur.getEdgeStart()+len);
+		split.getChildren().put( text.charAt(cur.getEdgeStart()), cur);
+		cur.setParent(split);
+		
+		//Now add a leaf to this node for the new character.
+		addLeaf(split, text.charAt(phase), phase);
+		return split;
+	}
+	
+	/* Function to create the suffix tree using the input string "in".*/
 	public void createTree(String in){
+		Node from;
 		text = in;
+		
+		/* Check if the input is okay. */
 		if(text == null || text.length()==0){
 			return;
 		}
+		/* Add the magic char if required. We build only explicit suffix tree. */
 		else if( (text.charAt( text.length()-1 ) != magicCharacter) ){
 			text = text + magicCharacter;
 		}
-	
 		textLength = text.length();
-		System.out.println("Test length is "+textLength);
-		System.out.println("Test is "+text);
-		
-		Node temp;
-		current_node = root;
-		current_edge = 0;
-		current_length = 0;
-						
+										
 		/* Run n phases of the algorithm with phase 'i' having 'i' extensions.*/
 		for( int i=0; i<text.length(); i++){
-			/* Started phase i+1. */
-			remainder++;
-			temp = null;
+			times++;
+			from = null;
 			
-			while(remainder > 0){
-			
-				if(current_length == 0) {
-					current_edge = i;
-				}
-				if( !current_node.children.containsKey(text.charAt(current_edge)) ){
-					Node leaf = new Node(nodeId++);
-					leaf.setEdgeStart(i);
-					leaf.setEdgeEnd(textLength);
-					current_node.children.put(text.charAt(current_edge), leaf);
-					leaf.setParent(current_node);
-					if(temp != null){
-						temp.suffixLink = current_node;
-					}
-					temp = current_node;
-				}
-				else{
-					Node next = current_node.children.get(text.charAt(current_edge));
-					if(current_length >= next.length(i)){
-						current_edge += next.length(i);
-						current_length -= next.length(i);
-						current_node = next;
-						//System.out.println("walking down with cur edge "+current_edge+" cur len "+current_length);						
+			for(;times>0; times--){
+				if(pos.getIndex() == 0)
+					pos.setEdge(i);
+				
+				/*If the edge labelled with the character to be added is present in the current node
+				  then search for the position where we want to add this substring and if the edge label
+				  is already present then we do nothing, else we split the node into two and add the 
+				  label to the newly created internal node.*/
+				if( pos.getNode().getChildren().containsKey(text.charAt(pos.getEdge())) == true ){
+					
+					/* Fetch the node which is labelled with the character we want to add. */
+					Node current = pos.getNode().getChildren().get(text.charAt(pos.getEdge()));
+					
+					/*If the string we want to add is already present then do nothing. */
+					if(pos.getIndex() >= current.length(i)){
+						pos.setIndex( pos.getEdge() + current.length(i) );
+						pos.setIndex( pos.getIndex() - current.length(i) );
+						pos.setNode(current);
 						continue;
 					}
-					if( text.charAt(next.getEdgeStart() + current_length) == text.charAt(i)){
-						current_length++;
-						if(temp != null){
-							temp.suffixLink = current_node;
-						}
-						temp = current_node;
+					if( text.charAt(current.getEdgeStart() + pos.getIndex()) == text.charAt(i)){
+						pos.setIndex(pos.getIndex()+1);
+						if(from != null)
+							from.setSuffixLink(pos.getNode());
+						from = pos.getNode();
 						break;
 					}
-					/*Split the nodes here*/
-					Node split = new Node(nodeId++);
-					split.setEdgeStart(next.getEdgeStart());
-					split.setEdgeEnd(next.getEdgeStart()+current_length);
-					current_node.children.put(text.charAt(current_edge), split);
-					split.setParent(current_node);
-					
-					Node leaf = new Node(nodeId++);
-					leaf.setEdgeStart(i);
-					leaf.setEdgeEnd(textLength);
-					split.children.put(text.charAt(i), leaf);
-					leaf.setParent(split);
-					
-					//System.out.println("next edge start is "+next.getEdgeStart());
-					//System.out.println("current edge is "+current_edge);
-				
-					next.setEdgeStart(next.getEdgeStart()+current_length);
-					split.children.put( text.charAt(next.getEdgeStart()), next);
-					next.setParent(split);
-					
-					if(temp != null){
-						temp.suffixLink = split;
-					}
-					temp = split;
+					/* Split the node here. */
+					Node sp = split(current, text.charAt(pos.getEdge()), pos.getIndex(), i);
+					if(from != null)
+						from.setSuffixLink(sp);
+					from = sp;
 				}
-				remainder--;
+				/* If the edge label we want to add is not present in the current node then
+				   create a new leaf and add it to the the newly created node. */
+				else{
+					addLeaf(pos.getNode(),text.charAt(pos.getEdge()),i);
+					if(from != null)
+						from.setSuffixLink(pos.getNode());
+					from = pos.getNode();
+				}
 			
-				if(current_node.isRoot() && current_length > 0){
-					current_length--;
-					current_edge = i - remainder + 1;
-				} else {
-					if(current_node.suffixLink != null){
-						current_node = current_node.suffixLink;
+				if(pos.getNode().isRoot() && pos.getIndex() > 0){
+					/* If we are inserting at only root ten just update the references and do nothing else. */
+					pos.setIndex(pos.getIndex()-1);
+					pos.setEdge(i-times);
+				}
+				else {
+					/* Move the current node position to the suffix link of the current node.
+					   If the node does not have the suffix link pointing to anyone then point
+					   the current node to root, because we'll have to start from the root anyway.*/
+					if(pos.getNode().getSuffixLink() != null){
+						pos.setNode(pos.getNode().getSuffixLink());
 					} else{
-						current_node = root;
+						pos.setNode(root);
 					}
 				}
 			}
 		}
 	}
-	
-	String edgeString(Node node) {
-        return text.substring(node.getEdgeStart(), node.getEdgeEnd());
-    }
-
-    void printTree() {
-        System.out.println("digraph {");
-        System.out.println("\trankdir = LR;");
-        System.out.println("\tedge [arrowsize=0.4,fontsize=10]");
-        System.out.println("\tnode1 [label=\"\",style=filled,fillcolor=lightgrey,shape=circle,width=.1,height=.1];");
-        System.out.println("//------leaves------");
-        printLeaves(root);
-        System.out.println("//------internal nodes------");
-        printInternalNodes(root);
-        System.out.println("//------edges------");
-        printEdges(root);
-        System.out.println("//------suffix links------");
-        printSLinks(root);
-        System.out.println("}");
-    }
-
-    void printLeaves(Node x) {
-        if (x.children.size() == 0)
-        	System.out.println("\tnode"+x.getNodeId()+" [label=\"\",shape=point]");
-        else {
-            for (Node child : x.children.values())
-                printLeaves(child);
-        }
-    }
-
-    void printInternalNodes(Node x) {
-        if (!x.isRoot() && x.children.size() > 0)
-        	System.out.println("\tnode"+x.getNodeId()+" [label=\"\",style=filled,fillcolor=lightgrey,shape=circle,width=.07,height=.07]");
-
-        for (Node child : x.children.values())
-            printInternalNodes(child);
-    }
-
-    void printEdges(Node x) {
-        for (Node child : x.children.values()) {
-        	System.out.println("\tnode"+x.getNodeId()+" -> node"+child.getNodeId()+" [label=\""+edgeString(child)+"\",weight=3]");
-            printEdges(child);
-        }
-    }
-
-    void printSLinks(Node x) {
-        if (x.suffixLink != null)
-        	System.out.println("\tnode"+x.getNodeId()+" -> node"+x.suffixLink.getNodeId()+" [label=\"\",weight=1,style=dotted]");
-        for (Node child : x.children.values())
-            printSLinks(child);
-    }
 }
