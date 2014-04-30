@@ -3,23 +3,22 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Map.Entry;
 
 public class Main {
 
 	/*Prints the output specified in the assignment statement.*/
-	public static void printOutput(BufferedWriter bw, Node node) throws Exception{
-		bw.write(node.getNodeId()+":");
-		String out = null;
+	public static void printOutput(PrintWriter pw, Node node, SuffixTree t) throws Exception{
+		pw.println(node.getNodeId()+":");
 		for (Entry<Character, Node> entry : node.getChildren().entrySet()) {
-			out = entry.getKey()+" "+entry.getValue().getEdgeStart()+
+			pw.println(entry.getKey()+" "+entry.getValue().getEdgeStart()+
 								 " "+entry.getValue().getEdgeEnd()+
-								 " "+entry.getValue().getNodeId()+";";
-			bw.write(out);
+								 " "+entry.getValue().getNodeId()+";");
 		}
-		bw.newLine();
+		pw.println("");
 		for (Entry<Character, Node> entry : node.getChildren().entrySet()) {
-			printOutput(bw, entry.getValue());
+			printOutput(pw, entry.getValue(),t);
 		}
 		return;
 	}
@@ -56,7 +55,9 @@ public class Main {
 		try{
 			br = new BufferedReader(new FileReader(inputFile));
 			header = br.readLine();
-			input = br.readLine();
+            System.out.println("Header is "+header);
+            input = br.readLine();
+            System.out.println("Input of length "+input.length());
 			br.close();
 		}catch (IOException e) {
 			System.err.println("ERROR: Exception occured while reading input file "+e.getMessage());
@@ -75,14 +76,20 @@ public class Main {
 		BufferedWriter bw = null;
 		try {
 			bw = new BufferedWriter(new FileWriter(outputFile));
+			PrintWriter pw = new PrintWriter(bw);
 			/* Print output to the file here. */
-			printOutput(bw, ukkonen.getRoot());	
+			printOutput(pw, ukkonen.getRoot(),ukkonen);	
+			pw.close();
 			bw.close();
+			bw = new BufferedWriter(new FileWriter("diagram"));
+			ukkonen.printTree(bw);
+			bw.close();
+			
 		} catch (IOException e) {
 			System.err.println("ERROR: Exception occured while writing output file "+e.getMessage());
 			System.exit(1);
 		}
-		
+				
 		ukkonen.free();		
 		System.out.println("Output Saved to the file \""+outputFile+"\"");
 		System.exit(0);

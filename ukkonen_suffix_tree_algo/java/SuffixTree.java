@@ -1,3 +1,5 @@
+import java.io.BufferedWriter;
+import java.io.PrintWriter;
 import java.util.Map.Entry;
 
 /* The class to build the suffix tree. */
@@ -111,12 +113,16 @@ public class SuffixTree {
 		}
 		/* Add the magic char if required. We build only explicit suffix tree. */
 		else if( (text.charAt( text.length()-1 ) != magicCharacter) ){
+			System.out.println("Adding Magic Character ");
 			text = text + magicCharacter;
 		}
 		textLength = text.length();
+		
+		System.out.println("Suffix Tree: Text of length "+text.length());
 										
 		/* Run n phases of the algorithm with phase 'i' having 'i' extensions.*/
 		for( int i=0; i<text.length(); i++){
+			//System.out.println("Running phase "+i);
 			times++;
 			from = null;
 			
@@ -180,4 +186,57 @@ public class SuffixTree {
 			}
 		}
 	}
+	
+		
+		String edgeString(Node node) {
+	         return text.substring(node.getEdgeStart(), node.getEdgeEnd());
+	     }
+	 
+	     void printTree( BufferedWriter bw ) throws java.io.IOException {
+	    	 PrintWriter pw = new PrintWriter(bw);
+	    	 pw.println("digraph {");
+	    	 pw.println("\trankdir = LR;");
+	    	 pw.println("\tedge [arrowsize=0.4,fontsize=10]");
+	    	 pw.println("\tnode1 [label=\"\",style=filled,fillcolor=lightgrey,shape=circle,width=.1,height=.1];");
+	    	 pw.println("//------leaves------");
+	         printLeaves(root,pw);
+	         pw.println("//------internal nodes------");
+	         printInternalNodes(root,pw);
+	         pw.println("//------edges------");
+	         printEdges(root,pw);
+	         pw.println("//------suffix links------");
+	         printSLinks(root,pw);
+	         pw.println("}");
+	      }
+	 
+	     void printLeaves(Node x, PrintWriter pw) throws java.io.IOException {
+	         if (x.getChildren().size() == 0)
+	        	 pw.println("\tnode"+x.getNodeId()+" [label=\"\",shape=point]");
+	         else {
+	             for (Node child : x.getChildren().values())
+	                 printLeaves(child,pw);
+	         }
+	    }
+	 
+	     void printInternalNodes(Node x, PrintWriter pw) throws java.io.IOException {
+	         if (!x.isRoot() && x.getChildren().size() > 0)
+	        	 pw.println("\tnode"+x.getNodeId()+" [label=\"\",style=filled,fillcolor=lightgrey,shape=circle,width=.07,height=.07]");
+	 
+	         for (Node child : x.getChildren().values())
+	             printInternalNodes(child,pw);
+	     }
+	 
+	     void printEdges(Node x, PrintWriter pw) throws java.io.IOException {
+	         for (Node child : x.getChildren().values())  {
+	        	 pw.println("\tnode"+x.getNodeId()+" -> node"+child.getNodeId()+" [label=\""+edgeString(child)+"\",weight=3]");
+	             printEdges(child,pw);
+	         }
+	     }
+	 
+	     void printSLinks(Node x, PrintWriter pw) throws java.io.IOException {
+	         if (x.getSuffixLink() != null)
+	        	 pw.println("\tnode"+x.getNodeId()+" -> node"+x.getSuffixLink().getNodeId()+" [label=\"\",weight=1,style=dotted]");
+	         for (Node child : x.getChildren().values())
+	             printSLinks(child,pw);
+	     }
 }
