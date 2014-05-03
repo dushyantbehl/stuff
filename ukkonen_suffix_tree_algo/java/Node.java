@@ -30,7 +30,7 @@ public class Node {
 		children = new HashMap<Character, Node>();
 		parent = null;
 		edgeStart = 0;
-		edgeEnd = 0;
+		edgeEnd = Integer.MAX_VALUE;
 		nodeId = id;
 		suffixLink = null;
 	}
@@ -86,7 +86,7 @@ public class Node {
 
 	/* Returns the length of the edge incoming to this node.*/
 	public int length(int phaseID){
-		return edgeEnd - edgeStart;
+		return Math.min(edgeEnd, phaseID + 1) - edgeStart;
 	}
 	
 	/* Node is leaf only if its children are null */

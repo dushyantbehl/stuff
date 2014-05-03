@@ -63,7 +63,8 @@ public class Main {
 			System.err.println("ERROR: Exception occured while reading input file "+e.getMessage());
 			System.exit(1);
 		}
-		System.out.println("Read the input from the file");
+		System.out.println("Read the input from the file of length "+input.length());
+		System.out.println("Trimmed the input remaining length "+input.trim().length());		
 		System.out.println("Using the magic character \'"+ukkonen.getMagicCharacter()+"\'");
 				
 		startTime = System.currentTimeMillis();
@@ -82,7 +83,7 @@ public class Main {
 			pw.close();
 			bw.close();
 			bw = new BufferedWriter(new FileWriter("diagram"));
-			ukkonen.printTree(bw);
+			//ukkonen.printTree(bw);
 			bw.close();
 			
 		} catch (IOException e) {

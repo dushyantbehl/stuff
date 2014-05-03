@@ -9,6 +9,7 @@ public class Index {
 	private Node node;
 	private int edge;		
 	private int index;
+	private int phaseID;
 	
 	//Constructors
 	public Index() {
@@ -52,5 +53,13 @@ public class Index {
 	
 	public void setNode(Node node) {
 		this.node = node;
+	}
+
+	public int getPhaseID() {
+		return phaseID;
+	}
+
+	public void setPhaseID(int phaseID) {
+		this.phaseID = phaseID;
 	}
 }
