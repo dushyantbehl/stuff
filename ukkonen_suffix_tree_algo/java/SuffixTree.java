@@ -17,7 +17,7 @@ public class SuffixTree {
 	
 	/* The node id variable, used to assign unique
 	   node id's to the nodes. */
-	private int nodeId = 0;
+	private int nodeId = 1;
 	
 	/* The variable storing where each addition should happen. */
 	private Index pos;
@@ -26,7 +26,7 @@ public class SuffixTree {
 	private int times;
 	
 	/* Length of the backing string. */
-	private int textLength;
+	//private int textLength;
 			
 	//Constructor
 	public SuffixTree(){
@@ -34,8 +34,9 @@ public class SuffixTree {
 		text = null;
 		pos = new Index(root);
 		times = 0;
-		textLength = 0;
+//		textLength = 0;
 	}
+	
 	/* Getter and setters of some variables. */
 	public Node getRoot(){
 		return root;
@@ -74,7 +75,7 @@ public class SuffixTree {
 		
 		//Create a new node and add it to the internal node as a leaf.
 		Node leaf = new Node(nodeId++);
-		leaf.setEdgeEnd(textLength);
+		leaf.setEdgeEnd(Integer.MAX_VALUE);
 		leaf.setEdgeStart(phase);
 		cur.getChildren().put(edge, leaf);
 		leaf.setParent(cur);
@@ -106,7 +107,7 @@ public class SuffixTree {
 	public void createTree(String in){
 		Node from;
 		text = in;
-		
+
 		/* Check if the input is okay. */
 		if(text == null || text.length()==0){
 			return;
@@ -116,17 +117,18 @@ public class SuffixTree {
 			System.out.println("Adding Magic Character ");
 			text = text + magicCharacter;
 		}
-		textLength = text.length();
+//		textLength = text.length();
 		
 		System.out.println("Suffix Tree: Text of length "+text.length());
 										
 		/* Run n phases of the algorithm with phase 'i' having 'i' extensions.*/
 		for( int i=0; i<text.length(); i++){
-			//System.out.println("Running phase "+i);
+			
 			times++;
 			from = null;
 			
 			for(;times>0; times--){
+				
 				if(pos.getIndex() == 0)
 					pos.setEdge(i);
 				
@@ -141,9 +143,14 @@ public class SuffixTree {
 					
 					/*If the string we want to add is already present then do nothing. */
 					if(pos.getIndex() >= current.length(i)){
-						pos.setIndex( pos.getEdge() + current.length(i) );
+						pos.setEdge( pos.getEdge() + current.length(i) );
 						pos.setIndex( pos.getIndex() - current.length(i) );
 						pos.setNode(current);
+						
+						/* Before we jump into next iteration we should set 
+						   times to times+1 As the next iteration will first 
+						   try to set times to times -1 but we don't want it to change */
+						times++; 
 						continue;
 					}
 					if( text.charAt(current.getEdgeStart() + pos.getIndex()) == text.charAt(i)){
@@ -159,6 +166,7 @@ public class SuffixTree {
 						from.setSuffixLink(sp);
 					from = sp;
 				}
+				
 				/* If the edge label we want to add is not present in the current node then
 				   create a new leaf and add it to the the newly created node. */
 				else{
@@ -171,7 +179,7 @@ public class SuffixTree {
 				if(pos.getNode().isRoot() && pos.getIndex() > 0){
 					/* If we are inserting at only root ten just update the references and do nothing else. */
 					pos.setIndex(pos.getIndex()-1);
-					pos.setEdge(i-times);
+					pos.setEdge(i-times+2);
 				}
 				else {
 					/* Move the current node position to the suffix link of the current node.
@@ -189,6 +197,7 @@ public class SuffixTree {
 	
 		
 		String edgeString(Node node) {
+			 if(node.getEdgeEnd()>text.length()) node.setEdgeEnd(text.length());
 	         return text.substring(node.getEdgeStart(), node.getEdgeEnd());
 	     }
 	 

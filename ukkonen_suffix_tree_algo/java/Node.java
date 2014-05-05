@@ -30,9 +30,9 @@ public class Node {
 		children = new HashMap<Character, Node>();
 		parent = null;
 		edgeStart = 0;
-		edgeEnd = Integer.MAX_VALUE;
 		nodeId = id;
 		suffixLink = null;
+		//System.out.println("Constructor called + nodeid is "+id);
 	}
 
 	/* Getter and Setters for private variables. */
@@ -86,7 +86,7 @@ public class Node {
 
 	/* Returns the length of the edge incoming to this node.*/
 	public int length(int phaseID){
-		return Math.min(edgeEnd, phaseID + 1) - edgeStart;
+		return Math.min(edgeEnd, phaseID) - edgeStart;
 	}
 	
 	/* Node is leaf only if its children are null */

@@ -37,12 +37,12 @@ public class Main {
 		SuffixTree ukkonen = new SuffixTree();
 		
 		/*Exit if no input file is specified to the program.*/
-		if(args.length == 0){
-			System.out.println("usage: java Main <input-file>");
+		if(args.length < 2){
+			System.out.println("usage: java Main <input-file> <output-file>");
 			System.exit(1);
 		}
 		String inputFile = args[0];
-		String outputFile = "SuffixTree.output";
+		String outputFile = args[1];
 		
 		System.out.println("Using the input file \""+inputFile+"\"");
 		
@@ -64,11 +64,10 @@ public class Main {
 			System.exit(1);
 		}
 		System.out.println("Read the input from the file of length "+input.length());
-		System.out.println("Trimmed the input remaining length "+input.trim().length());		
 		System.out.println("Using the magic character \'"+ukkonen.getMagicCharacter()+"\'");
 				
 		startTime = System.currentTimeMillis();
-		ukkonen.createTree(input);
+		ukkonen.createTree(input+input+input);
 		endTime = System.currentTimeMillis();
 		
 		timeTaken = endTime - startTime;
@@ -82,7 +81,7 @@ public class Main {
 			printOutput(pw, ukkonen.getRoot(),ukkonen);	
 			pw.close();
 			bw.close();
-			bw = new BufferedWriter(new FileWriter("diagram"));
+			bw = new BufferedWriter(new FileWriter("diagram.dot"));
 			//ukkonen.printTree(bw);
 			bw.close();
 			

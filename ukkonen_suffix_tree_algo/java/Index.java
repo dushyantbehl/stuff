@@ -10,13 +10,13 @@ public class Index {
 	private int edge;		
 	private int index;
 	private int phaseID;
-	
+    
 	//Constructors
 	public Index() {
 		node = null;
 		edge = 0;
 		index = 0;
-	}
+    }
 	
 	public Index (Node n) {
 		node = n;
