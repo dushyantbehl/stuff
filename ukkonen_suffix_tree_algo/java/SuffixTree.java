@@ -17,15 +17,15 @@ public class SuffixTree {
 	   node id's to the nodes. */
 	private int nodeId = 1;
 	
-	/* The variable storing where each addition should happen. */
+	/* The variable storing where new addition should happen. */
 	private Index pos;
-	
-	/* The variable which stores how many iterations to run. */
-	private int times;
 	
 	/* Length of the backing string. */
 	private int textLength;
-			
+	
+	/* The variable which stores how many iterations to run. */
+	private int times;
+				
 	//Constructor
 	public SuffixTree(){
 		root = new Node(nodeId++);
@@ -169,7 +169,7 @@ public class SuffixTree {
 				}
 			
 				if(pos.getNode().isRoot() && pos.getIndex() > 0){
-					/* If we are inserting at only root ten just update the references and do nothing else. */
+					/* If we are inserting at only root then just update the references and do nothing else. */
 					pos.setIndex(pos.getIndex()-1);
 					pos.setEdge(i-times+2);
 				}

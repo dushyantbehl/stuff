@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 
 public class Main {
 
-	/*Prints the output specified in the assignment statement.*/
+	/*Prints the output in format specified in the assignment statement.*/
 	public static void printOutput(PrintWriter pw, Node node, SuffixTree t) throws Exception{
 		pw.println(node.getNodeId()+":");
 		for (Entry<Character, Node> entry : node.getChildren().entrySet()) {
