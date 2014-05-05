@@ -54,7 +54,6 @@ public class Main {
 			header = br.readLine();
             System.out.println("Header is "+header);
             input = br.readLine();
-            System.out.println("Input of length "+input.length());
 			br.close();
 		}catch (IOException e) {
 			System.err.println("ERROR: Exception occured while reading input file "+e.getMessage());
@@ -64,7 +63,7 @@ public class Main {
 		System.out.println("Using the magic character \'"+ukkonen.getMagicCharacter()+"\'");
 				
 		startTime = System.currentTimeMillis();
-		ukkonen.createTree(input.substring(0,10));
+		ukkonen.createTree(input);
 		endTime = System.currentTimeMillis();
 		
 		timeTaken = endTime - startTime;
