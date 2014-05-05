@@ -32,7 +32,6 @@ public class Node {
 		edgeStart = 0;
 		nodeId = id;
 		suffixLink = null;
-		//System.out.println("Constructor called + nodeid is "+id);
 	}
 
 	/* Getter and Setters for private variables. */

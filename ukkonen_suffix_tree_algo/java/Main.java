@@ -26,7 +26,6 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		
 		BufferedReader br = null;
-		@SuppressWarnings("unused")
 		String header = null;
 		String input = null;
 		long startTime = 0;
@@ -49,9 +48,7 @@ public class Main {
 		/* Input string should be stored in the file in single line. 
 		   For the test case we assume that the input string can be 
 		   read from the file in one go.*/
-		
-		System.out.println("Reading input from the file");
-		
+				
 		try{
 			br = new BufferedReader(new FileReader(inputFile));
 			header = br.readLine();
@@ -67,7 +64,7 @@ public class Main {
 		System.out.println("Using the magic character \'"+ukkonen.getMagicCharacter()+"\'");
 				
 		startTime = System.currentTimeMillis();
-		ukkonen.createTree(input+input+input);
+		ukkonen.createTree(input.substring(0,10));
 		endTime = System.currentTimeMillis();
 		
 		timeTaken = endTime - startTime;
@@ -81,15 +78,12 @@ public class Main {
 			printOutput(pw, ukkonen.getRoot(),ukkonen);	
 			pw.close();
 			bw.close();
-			bw = new BufferedWriter(new FileWriter("diagram.dot"));
-			//ukkonen.printTree(bw);
-			bw.close();
-			
 		} catch (IOException e) {
 			System.err.println("ERROR: Exception occured while writing output file "+e.getMessage());
 			System.exit(1);
 		}
 				
+		/* Cleanup memory before exiting. */
 		ukkonen.free();		
 		System.out.println("Output Saved to the file \""+outputFile+"\"");
 		System.exit(0);

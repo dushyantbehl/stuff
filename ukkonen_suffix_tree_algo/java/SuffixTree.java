@@ -1,5 +1,3 @@
-import java.io.BufferedWriter;
-import java.io.PrintWriter;
 import java.util.Map.Entry;
 
 /* The class to build the suffix tree. */
@@ -26,7 +24,7 @@ public class SuffixTree {
 	private int times;
 	
 	/* Length of the backing string. */
-	//private int textLength;
+	private int textLength;
 			
 	//Constructor
 	public SuffixTree(){
@@ -34,7 +32,7 @@ public class SuffixTree {
 		text = null;
 		pos = new Index(root);
 		times = 0;
-//		textLength = 0;
+		textLength = 0;
 	}
 	
 	/* Getter and setters of some variables. */
@@ -75,7 +73,7 @@ public class SuffixTree {
 		
 		//Create a new node and add it to the internal node as a leaf.
 		Node leaf = new Node(nodeId++);
-		leaf.setEdgeEnd(Integer.MAX_VALUE);
+		leaf.setEdgeEnd(textLength);
 		leaf.setEdgeStart(phase);
 		cur.getChildren().put(edge, leaf);
 		leaf.setParent(cur);
@@ -105,30 +103,24 @@ public class SuffixTree {
 	
 	/* Function to create the suffix tree using the input string "in".*/
 	public void createTree(String in){
-		Node from;
-		text = in;
 
 		/* Check if the input is okay. */
-		if(text == null || text.length()==0){
+		if(in == null || in.length()==0){
 			return;
 		}
 		/* Add the magic char if required. We build only explicit suffix tree. */
-		else if( (text.charAt( text.length()-1 ) != magicCharacter) ){
-			System.out.println("Adding Magic Character ");
-			text = text + magicCharacter;
+		else if( (in.charAt( in.length()-1 ) != magicCharacter) ){
+			in = in + magicCharacter;
 		}
-//		textLength = text.length();
-		
-		System.out.println("Suffix Tree: Text of length "+text.length());
+		text = in;
+		textLength = text.length();
 										
-		/* Run n phases of the algorithm with phase 'i' having 'i' extensions.*/
+		/* Run n phases of the algorithm. */
 		for( int i=0; i<text.length(); i++){
-			
+	
 			times++;
-			from = null;
-			
-			for(;times>0; times--){
-				
+			pos.setFrom(null);
+			for(;times>0; times--){			
 				if(pos.getIndex() == 0)
 					pos.setEdge(i);
 				
@@ -155,25 +147,25 @@ public class SuffixTree {
 					}
 					if( text.charAt(current.getEdgeStart() + pos.getIndex()) == text.charAt(i)){
 						pos.setIndex(pos.getIndex()+1);
-						if(from != null)
-							from.setSuffixLink(pos.getNode());
-						from = pos.getNode();
+						if(pos.isFrom())
+							pos.getFrom().setSuffixLink(pos.getNode());
+						pos.setFrom(pos.getNode());
 						break;
 					}
 					/* Split the node here. */
 					Node sp = split(current, text.charAt(pos.getEdge()), pos.getIndex(), i);
-					if(from != null)
-						from.setSuffixLink(sp);
-					from = sp;
+					if(pos.isFrom())
+						pos.getFrom().setSuffixLink(sp);
+					pos.setFrom(sp);
 				}
 				
 				/* If the edge label we want to add is not present in the current node then
 				   create a new leaf and add it to the the newly created node. */
 				else{
 					addLeaf(pos.getNode(),text.charAt(pos.getEdge()),i);
-					if(from != null)
-						from.setSuffixLink(pos.getNode());
-					from = pos.getNode();
+					if(pos.isFrom())
+						pos.getFrom().setSuffixLink(pos.getNode());
+					pos.setFrom(pos.getNode());
 				}
 			
 				if(pos.getNode().isRoot() && pos.getIndex() > 0){
@@ -194,58 +186,4 @@ public class SuffixTree {
 			}
 		}
 	}
-	
-		
-		String edgeString(Node node) {
-			 if(node.getEdgeEnd()>text.length()) node.setEdgeEnd(text.length());
-	         return text.substring(node.getEdgeStart(), node.getEdgeEnd());
-	     }
-	 
-	     void printTree( BufferedWriter bw ) throws java.io.IOException {
-	    	 PrintWriter pw = new PrintWriter(bw);
-	    	 pw.println("digraph {");
-	    	 pw.println("\trankdir = LR;");
-	    	 pw.println("\tedge [arrowsize=0.4,fontsize=10]");
-	    	 pw.println("\tnode1 [label=\"\",style=filled,fillcolor=lightgrey,shape=circle,width=.1,height=.1];");
-	    	 pw.println("//------leaves------");
-	         printLeaves(root,pw);
-	         pw.println("//------internal nodes------");
-	         printInternalNodes(root,pw);
-	         pw.println("//------edges------");
-	         printEdges(root,pw);
-	         pw.println("//------suffix links------");
-	         printSLinks(root,pw);
-	         pw.println("}");
-	      }
-	 
-	     void printLeaves(Node x, PrintWriter pw) throws java.io.IOException {
-	         if (x.getChildren().size() == 0)
-	        	 pw.println("\tnode"+x.getNodeId()+" [label=\"\",shape=point]");
-	         else {
-	             for (Node child : x.getChildren().values())
-	                 printLeaves(child,pw);
-	         }
-	    }
-	 
-	     void printInternalNodes(Node x, PrintWriter pw) throws java.io.IOException {
-	         if (!x.isRoot() && x.getChildren().size() > 0)
-	        	 pw.println("\tnode"+x.getNodeId()+" [label=\"\",style=filled,fillcolor=lightgrey,shape=circle,width=.07,height=.07]");
-	 
-	         for (Node child : x.getChildren().values())
-	             printInternalNodes(child,pw);
-	     }
-	 
-	     void printEdges(Node x, PrintWriter pw) throws java.io.IOException {
-	         for (Node child : x.getChildren().values())  {
-	        	 pw.println("\tnode"+x.getNodeId()+" -> node"+child.getNodeId()+" [label=\""+edgeString(child)+"\",weight=3]");
-	             printEdges(child,pw);
-	         }
-	     }
-	 
-	     void printSLinks(Node x, PrintWriter pw) throws java.io.IOException {
-	         if (x.getSuffixLink() != null)
-	        	 pw.println("\tnode"+x.getNodeId()+" -> node"+x.getSuffixLink().getNodeId()+" [label=\"\",weight=1,style=dotted]");
-	         for (Node child : x.getChildren().values())
-	             printSLinks(child,pw);
-	     }
 }

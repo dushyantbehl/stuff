@@ -2,6 +2,8 @@
    Here position is represented by a node,
    the edge label inside the node and also
    index into the edge label.
+   We also store the node where we'd like 
+   to create the current suffix link.
  */
 public class Index {
 	
@@ -10,10 +12,12 @@ public class Index {
 	private int edge;		
 	private int index;
 	private int phaseID;
-    
+	private Node from;
+	
 	//Constructors
 	public Index() {
 		node = null;
+		from = null;
 		edge = 0;
 		index = 0;
     }
@@ -22,12 +26,14 @@ public class Index {
 		node = n;
 		edge = 0;
 		index = 0;
+		from = null;
 	}
 
-	public Index (Node n, int e, int p) {
+	public Index (Node n, int e, int p, Node f) {
 		node = n;
 		edge = e;
 		index = p;
+		from = f;
 	}
 	
 	/* Getter and setters of all the private variables. */
@@ -61,5 +67,17 @@ public class Index {
 
 	public void setPhaseID(int phaseID) {
 		this.phaseID = phaseID;
+	}
+
+	public Node getFrom() {
+		return from;
+	}
+
+	public void setFrom(Node from) {
+		this.from = from;
+	}
+	
+	public boolean isFrom(){
+		return from != null;
 	}
 }
