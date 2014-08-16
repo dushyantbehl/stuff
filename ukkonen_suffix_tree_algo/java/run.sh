@@ -1,5 +1,9 @@
 #!/bin/sh
 
+HELLO="Breathe, Breathing the Air. Don't be afraid to care."
+
+echo $HELLO
+
 ##Compile the files
 javac Index.java Main.java Node.java SuffixTree.java
 
