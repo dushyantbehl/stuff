@@ -21,3 +21,5 @@ else
     # Run the program with input file as first argument.
     java Main $1 $2
 fi
+
+echo "I don't need no civil war."
